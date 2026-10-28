@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://psit-attendance-calculator.pages.dev/sitemap.xml
+Sitemap: https://attendwise.pages.dev/sitemap.xml
