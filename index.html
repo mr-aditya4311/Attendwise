@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "AttendWise",
+  "alternateName": "PSIT Attendance Calculator",
+  "url": "https://psit-attendance-calculator.pages.dev/",
+  "description": "Calculate your PSIT attendance, predict future percentages, plan your target, and simulate medical or SAR leave. Built for PSIT Kanpur students.",
+  "inLanguage": "en",
+  "author": {
+    "@type": "Person",
+    "name": "Aditya Verma"
+  }
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How is my attendance calculated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AttendWise first works out effective absences: Total Absent + OAA minus O.A. Attendance. Your attendance percentage is then 100 minus (effective absences divided by total lectures, times 100). Values are rounded to 2 decimals for display only."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens to my attendance if I miss one day?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Missing a day adds your lectures per college day (8 by default, changeable in Settings) to both total lectures and absences, then recalculates the percentage, so it goes down. Use the \"Miss X days\" option on the Future Predictor page to see the exact effect."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many lectures do I need to reach 75%?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Target Planner uses: lectures needed = ceil(absent / (1 - target) - total), assuming your absences stay the same and every new lecture is attended. College days needed is that lecture count divided by lectures per college day, rounded up."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does approved medical leave remove absences?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Only in the Medical view, as a simulation. Each approved medical day counts as your lectures per college day, and that many lectures are subtracted from total absences (never below 0). Total lectures stay the same, and your main calculator result does not change. The run is added to your history log. Only count officially approved leave."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is SAR applied automatically?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The SAR box under the calculator result is a manual simulation. Enter the approved SAR lectures and it subtracts them from absences to show an after-SAR percentage. Total lectures stay the same, and nothing is applied to your main result."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my data saved anywhere?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Not on a server. AttendWise has no backend and no accounts. Settings and calculation history are saved in your browser's localStorage on that device only, so another browser or cleared site data will not have them."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is AttendWise an official PSIT website?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. AttendWise is an independent student project for PSIT Kanpur students. It is not affiliated with, endorsed by, or published by PSIT or any college authority. Confirm your official attendance with your institution."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does AttendWise know PSIT's official attendance rules?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The calculations are general attendance math. AttendWise does not know your college's rules on shortage, condonation, or how medical and SAR leave is approved, so treat every result as an estimate."
+      }
+    }
+  ]
+}
+  </script>
+  <title>AttendWise – PSIT Attendance Calculator</title>
+  <meta name="description" content="Calculate your PSIT attendance, predict future percentages, plan your target, and simulate medical or SAR leave. Built for PSIT Kanpur students.">
+  <meta name="author" content="Aditya Verma">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#f97316">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="AttendWise">
+  <link rel="canonical" href="https://psit-attendance-calculator.pages.dev/">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="favicon.ico" sizes="any">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AttendWise">
+  <meta property="og:title" content="AttendWise – PSIT Attendance Calculator">
+  <meta property="og:description" content="Calculate your PSIT attendance, predict future percentages, plan your target, and simulate medical or SAR leave. Built for PSIT Kanpur students.">
+  <meta property="og:url" content="https://psit-attendance-calculator.pages.dev/">
+  <meta property="og:image" content="https://psit-attendance-calculator.pages.dev/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AttendWise – PSIT Attendance Calculator">
+  <meta name="twitter:description" content="Calculate your PSIT attendance, predict future percentages, plan your target, and simulate medical or SAR leave. Built for PSIT Kanpur students.">
+  <meta name="twitter:image" content="https://psit-attendance-calculator.pages.dev/assets/og-image.png">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/pwa.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="app">
+  <header class="topbar">
+    <a class="brand" href="#home" data-route="home" aria-label="AttendWise home"><span class="brand-mark" aria-hidden="true">A</span><span class="brand-text"><span class="brand-name">AttendWise</span><span class="brand-tagline">Smart Attendance. Better Planning.</span></span></a>
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <ul>
+        <li><a href="#home" data-route="home"><svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 11l9-7 9 7v8a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a></li>
+        <li><a href="#calculator" data-route="calculator"><svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/></svg><span>Calculator</span></a></li>
+        <li><a href="#predictor" data-route="predictor"><svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg><span>Future Predictor</span></a></li>
+        <li><a href="#planner" data-route="planner"><svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span>Target Planner</span></a></li>
+        <li><a href="#medical" data-route="medical"><svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg><span>Medical</span></a></li>
+        <li><a href="#settings" data-route="settings"><svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span>Settings</span></a></li>
+      </ul>
+    </nav>
+    <div class="top-actions">
+</span>
+      <span class="avatar" aria-hidden="true">S</span>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" id="menu-toggle">
+        <span class="sr-only">Open menu</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+
+  <main id="main" class="container" tabindex="-1">
+    <!-- HOME -->
+    <section class="view" id="view-home" data-view="home" aria-labelledby="home-title">
+      <div class="hero">
+        <div class="card welcome-card">
+          <div class="welcome-top">
+            <p class="eyebrow">PSIT KANPUR</p>
+            <span class="portal-pill">Student Attendance Portal</span>
+          </div>
+          <div class="welcome-text">
+            <h1 id="home-title"><span class="hero-line">Welcome back,</span> <span class="hero-line"><span class="grad-text" id="welcome-name">Student</span> <span aria-hidden="true">👋</span></span></h1>
+            <p class="welcome-sub">Calculate your current attendance, predict future attendance, and plan how many lectures you need to reach your target.</p>
+            <div class="chip-pills">
+              <span class="pill-chip"><span class="chip-icon chip-target"><svg class="chip-svg" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span><span>Your target <strong id="welcome-target">75%</strong></span></span>
+              <span class="pill-chip"><span class="chip-icon chip-people"><svg class="chip-svg" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14.2c2.4.2 4.5 2 4.5 4.8"/></svg></span><span>Lectures per college day <strong id="welcome-lpd">8</strong></span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card current-card">
+          <h2 class="current-title">Current attendance</h2>
+          <div class="ring-wrap">
+            <div class="ring" id="home-ring" aria-hidden="true">
+              <div class="ring-inner"><svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true" focusable="false" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M22 9v7"/></svg></div>
+            </div>
+          </div>
+          <p class="big-number warn-text" id="home-current">Not calculated yet</p>
+          <div class="progress" role="img" aria-label="Current attendance progress" id="home-progress-wrap">
+            <div class="progress-fill" id="home-progress-fill"></div>
+          </div>
+          <p class="small muted">Calculate on the Calculator page to update this panel.</p>
+          <a class="btn btn-primary btn-cta" href="#calculator" data-route="calculator"><span class="btn-cta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/></svg></span><span>Go to Calculator</span><span class="btn-cta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+        </div>
+      </div>
+
+      <h2 class="section-title"><span class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Quick links</h2>
+      <div class="quick-grid">
+            <a class="quick-tile t-orange" href="#calculator" data-route="calculator">
+              <span class="tile-icon" aria-hidden="true"><svg class="tile-svg" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M5 4h14v16H5zM9 8h6M9 12h6M9 16h3"/></svg></span>
+              <span class="tile-body"><span class="tile-title">My Attendance</span><span class="tile-desc">Calculate your current attendance</span></span>
+              <span class="tile-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+            </a>
+            <a class="quick-tile t-blue" href="#predictor" data-route="predictor">
+              <span class="tile-icon" aria-hidden="true"><svg class="tile-svg" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg></span>
+              <span class="tile-body"><span class="tile-title">Future Predictor</span><span class="tile-desc">See future attendance projections</span></span>
+              <span class="tile-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+            </a>
+            <a class="quick-tile t-red" href="#predictor" data-route="predictor" data-focus="missed">
+              <span class="tile-icon" aria-hidden="true"><svg class="tile-svg" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="8"/><path d="M8 8l8 8"/></svg></span>
+              <span class="tile-body"><span class="tile-title">Missed Day Calculator</span><span class="tile-desc">Calculate impact of absent days</span></span>
+              <span class="tile-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+            </a>
+            <a class="quick-tile t-green" href="#planner" data-route="planner">
+              <span class="tile-icon" aria-hidden="true"><svg class="tile-svg" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+              <span class="tile-body"><span class="tile-title">Target Planner</span><span class="tile-desc">Plan how many lectures you need</span></span>
+              <span class="tile-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+            </a>
+            <a class="quick-tile t-purple" href="#predictor" data-route="predictor" data-focus="scenarios">
+              <span class="tile-icon" aria-hidden="true"><svg class="tile-svg" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="4" y="12" width="4" height="8" fill="currentColor"/><rect x="10" y="8" width="4" height="12" fill="currentColor"/><rect x="16" y="4" width="4" height="16" fill="currentColor"/></svg></span>
+              <span class="tile-body"><span class="tile-title">Scenario Comparison</span><span class="tile-desc">Compare different scenarios</span></span>
+              <span class="tile-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+            </a>
+            <a class="quick-tile t-pink" href="#medical" data-route="medical">
+              <span class="tile-icon" aria-hidden="true"><svg class="tile-svg" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg></span>
+              <span class="tile-body"><span class="tile-title">Medical</span><span class="tile-desc">Adjust absences for approved medical leave</span></span>
+              <span class="tile-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+            </a>
+      </div>
+
+      <div class="card history-card" id="history-card">
+        <div class="history-head">
+          <div class="history-title">
+            <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg></span>
+            <div>
+              <h2>Calculation history</h2>
+              <p class="muted small" id="history-status">History is saved in this browser only.</p>
+            </div>
+          </div>
+          <button type="button" class="btn btn-amber btn-small" id="history-clear"><span class="btn-trash" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></span><span>Clear history</span></button>
+        </div>
+        <ol class="history-list" id="history-list"></ol>
+      </div>
+
+
+      <section class="card seo-section" id="how-it-works" aria-labelledby="how-title">
+        <h2 id="how-title">How AttendWise works</h2>
+        <p>AttendWise is a set of calculators that work from the numbers you enter. Everything runs in your browser. Use the links below to jump to each tool.</p>
+
+        <h3>The attendance formula</h3>
+        <p>Effective absences = Total Absent + OAA minus O.A. Attendance. Attendance % = 100 minus ((effective absences divided by total lectures) times 100). Enter these on the <a href="#calculator" data-route="calculator">Calculator</a>.</p>
+
+        <h3>Future projections</h3>
+        <p>The <a href="#predictor" data-route="predictor">Future Predictor</a> adds future lectures to your total. Every future lecture is either attended (total goes up, absences stay the same) or missed (total and absences both go up). Mixed scenarios combine full attended days, full missed days, and partial days.</p>
+
+        <h3>Target planning</h3>
+        <p>The <a href="#planner" data-route="planner">Target Planner</a> shows how many lectures you need to reach a target percentage, assuming your absences stay the same and every new lecture is attended. College days needed is that lecture count divided by lectures per college day, rounded up.</p>
+
+        <h3>Medical adjustment</h3>
+        <p>On the <a href="#medical" data-route="medical">Medical</a> page, each approved medical day counts as your lectures per college day. That many lectures are subtracted from total absences, never going below 0. Total lectures do not change. Only count officially approved leave.</p>
+
+        <h3>SAR adjustment</h3>
+        <p>The SAR box under the <a href="#calculator" data-route="calculator">Calculator</a> result subtracts approved SAR lectures from absences and shows an after-SAR percentage. Total lectures do not change. It is a simulation only and does not change your main result.</p>
+
+        <h3>Limitations</h3>
+        <p>AttendWise gives estimates from the formulas above. It does not know your college's official attendance rules, and it is not an official PSIT tool. It has no institutional affiliation. Always confirm your attendance with your institution.</p>
+      </section>
+
+      <section class="card seo-section" id="faq" aria-labelledby="faq-title">
+        <h2 id="faq-title">Frequently asked questions</h2>
+        <details>
+          <summary>How is my attendance calculated?</summary>
+          <p>AttendWise first works out effective absences: Total Absent + OAA minus O.A. Attendance. Your attendance percentage is then 100 minus (effective absences divided by total lectures, times 100). Values are rounded to 2 decimals for display only.</p>
+        </details>
+        <details>
+          <summary>What happens to my attendance if I miss one day?</summary>
+          <p>Missing a day adds your lectures per college day (8 by default, changeable in Settings) to both total lectures and absences, then recalculates the percentage, so it goes down. Use the &quot;Miss X days&quot; option on the Future Predictor page to see the exact effect.</p>
+        </details>
+        <details>
+          <summary>How many lectures do I need to reach 75%?</summary>
+          <p>The Target Planner uses: lectures needed = ceil(absent / (1 - target) - total), assuming your absences stay the same and every new lecture is attended. College days needed is that lecture count divided by lectures per college day, rounded up.</p>
+        </details>
+        <details>
+          <summary>Does approved medical leave remove absences?</summary>
+          <p>Only in the Medical view, as a simulation. Each approved medical day counts as your lectures per college day, and that many lectures are subtracted from total absences (never below 0). Total lectures stay the same, and your main calculator result does not change. The run is added to your history log. Only count officially approved leave.</p>
+        </details>
+        <details>
+          <summary>Is SAR applied automatically?</summary>
+          <p>No. The SAR box under the calculator result is a manual simulation. Enter the approved SAR lectures and it subtracts them from absences to show an after-SAR percentage. Total lectures stay the same, and nothing is applied to your main result.</p>
+        </details>
+        <details>
+          <summary>Is my data saved anywhere?</summary>
+          <p>Not on a server. AttendWise has no backend and no accounts. Settings and calculation history are saved in your browser&#x27;s localStorage on that device only, so another browser or cleared site data will not have them.</p>
+        </details>
+        <details>
+          <summary>Is AttendWise an official PSIT website?</summary>
+          <p>No. AttendWise is an independent student project for PSIT Kanpur students. It is not affiliated with, endorsed by, or published by PSIT or any college authority. Confirm your official attendance with your institution.</p>
+        </details>
+        <details>
+          <summary>Does AttendWise know PSIT&#x27;s official attendance rules?</summary>
+          <p>No. The calculations are general attendance math. AttendWise does not know your college&#x27;s rules on shortage, condonation, or how medical and SAR leave is approved, so treat every result as an estimate.</p>
+        </details>
+      </section>
+    </section>
+
+    <!-- CALCULATOR -->
+    <section class="view" id="view-calculator" data-view="calculator" aria-labelledby="calc-title" hidden>
+      <div class="dash-grid">
+        <div class="dash-main">
+          <div class="card">
+            <h1 id="calc-title">Attendance Calculator</h1>
+            <form id="calc-form" novalidate>
+              <div class="field">
+                <label for="combinedAbsentOAA">Total Absent + OAA</label>
+                <input id="combinedAbsentOAA" name="combinedAbsentOAA" type="text" inputmode="numeric" autocomplete="off" aria-describedby="combinedAbsentOAA-help combinedAbsentOAA-error" required>
+                <p class="help" id="combinedAbsentOAA-help">Whole number, including on-duty absences.</p>
+                <p class="error" id="combinedAbsentOAA-error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="oaaAttendance">O.A. Attendance</label>
+                <input id="oaaAttendance" name="oaaAttendance" type="text" inputmode="numeric" autocomplete="off" aria-describedby="oaaAttendance-help oaaAttendance-error" required>
+                <p class="help" id="oaaAttendance-help">Lectures counted back as official attendance.</p>
+                <p class="error" id="oaaAttendance-error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="totalLectures">Total Lecture</label>
+                <input id="totalLectures" name="totalLectures" type="text" inputmode="numeric" autocomplete="off" aria-describedby="totalLectures-help totalLectures-error" required>
+                <p class="help" id="totalLectures-help">Total lectures held so far. Must be greater than 0.</p>
+                <p class="error" id="totalLectures-error" role="alert"></p>
+              </div>
+              <div class="btn-row">
+                <button type="submit" class="btn btn-primary" id="calc-submit">Calculate</button>
+                <button type="button" class="btn btn-outline" id="calc-reset">Reset</button>
+                <button type="button" class="btn btn-outline" id="calc-copy" disabled>Copy Result</button>
+              </div>
+              <p class="status-line" id="calc-form-status" role="status" aria-live="polite"></p>
+            </form>
+          </div>
+        </div>
+        <aside class="dash-side">
+          <div class="card result-card" aria-live="polite">
+            <h2>Result</h2>
+            <p class="big-number" id="calc-result">-</p>
+            <p class="status-line" id="calc-status"></p>
+            <div class="breakdown" id="calc-breakdown" aria-label="Calculation breakdown"></div>
+            <div class="progress" role="img" aria-label="Attendance progress" id="calc-progress-wrap">
+              <div class="progress-fill" id="calc-progress-fill"></div>
+              <div class="marker marker-current" id="calc-marker-current" hidden></div>
+              <div class="marker marker-target" id="calc-marker-target" hidden></div>
+            </div>
+            <div class="field" style="margin-top:1rem">
+              <label for="sar-quick">SAR lectures approved (after SAR attendance)</label>
+              <input id="sar-quick" type="text" inputmode="numeric" autocomplete="off" placeholder="e.g. 2">
+              <p class="error" id="sar-quick-error" role="alert"></p>
+            </div>
+            <p class="big-number" id="sar-quick-result" hidden></p>
+            <p class="small muted" id="sar-quick-note"></p>
+            <p class="small muted" id="calc-copy-status" role="status" aria-live="polite"></p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- FUTURE PREDICTOR -->
+    <section class="view" id="view-predictor" data-view="predictor" aria-labelledby="pred-title" hidden>
+      <h1 id="pred-title">Future Predictor</h1>
+      <p class="muted" id="pred-baseline-note">Calculate your attendance on the Calculator page first. The predictor uses the last calculated result.</p>
+      <div class="dash-grid">
+        <div class="dash-main">
+          <div class="card">
+            <h2>Baseline</h2>
+            <p class="small">Total lectures (T): <strong id="pred-T">-</strong> · Effective absences (A): <strong id="pred-A">-</strong> · Current: <strong id="pred-cur">-</strong></p>
+            <div class="field inline">
+              <label for="pred-tool">Scenario type</label>
+              <select id="pred-tool">
+                <option value="attend">Attend X days</option>
+                <option value="miss">Miss X days</option>
+                <option value="mixed">Mixed scenario</option>
+              </select>
+            </div>
+            <div id="pred-attend-panel" class="pred-panel">
+              <div class="chip-row" role="group" aria-label="Quick attend actions">
+                <button type="button" class="chip" data-attend="1">1 day</button>
+                <button type="button" class="chip" data-attend="5">5 days</button>
+                <button type="button" class="chip" data-attend="10">10 days</button>
+                <button type="button" class="chip" data-attend="15">15 days</button>
+              </div>
+            </div>
+            <div id="pred-miss-panel" class="pred-panel" hidden>
+              <div class="chip-row" role="group" aria-label="Quick miss actions">
+                <button type="button" class="chip" data-miss="1">1 day</button>
+                <button type="button" class="chip" data-miss="2">2 days</button>
+                <button type="button" class="chip" data-miss="3">3 days</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="pred-days">Number of college days</label>
+              <input id="pred-days" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pred-days-error" value="">
+              <p class="error" id="pred-days-error" role="alert"></p>
+            </div>
+            <div id="pred-mixed-panel" class="pred-panel" hidden>
+              <div class="field"><label for="mix-full-att">Fully attended days</label><input id="mix-full-att" type="text" inputmode="numeric" value="0"><p class="error" id="mix-full-att-error" role="alert"></p></div>
+              <div class="field"><label for="mix-full-abs">Fully absent days</label><input id="mix-full-abs" type="text" inputmode="numeric" value="0"><p class="error" id="mix-full-abs-error" role="alert"></p></div>
+              <div class="field"><label for="mix-partial-days">Partial days</label><input id="mix-partial-days" type="text" inputmode="numeric" value="0"><p class="error" id="mix-partial-days-error" role="alert"></p></div>
+              <div class="field"><label for="mix-partial-att">Lectures attended on partial days</label><input id="mix-partial-att" type="text" inputmode="numeric" value="0"><p class="help">Must be at most partial days × lectures per day.</p><p class="error" id="mix-partial-att-error" role="alert"></p></div>
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn btn-primary" id="pred-run">Calculate prediction</button>
+            </div>
+            <p class="status-line" id="pred-status" role="status" aria-live="polite"></p>
+            <div class="breakdown" id="pred-result"></div>
+          </div>
+
+          <div class="card">
+            <h2>Attendance Impact Calculator</h2>
+            <div class="field"><label for="imp-attend-days">Days to attend</label><input id="imp-attend-days" type="text" inputmode="numeric" value="0"><p class="error" id="imp-attend-days-error" role="alert"></p></div>
+            <div class="field"><label for="imp-attend">Extra lectures to attend</label><input id="imp-attend" type="text" inputmode="numeric" value="0"><p class="error" id="imp-attend-error" role="alert"></p></div>
+            <div class="field"><label for="imp-miss">Lectures to miss</label><input id="imp-miss" type="text" inputmode="numeric" value="0"><p class="error" id="imp-miss-error" role="alert"></p></div>
+            <div class="field">
+              <label for="imp-custom">Target (%)</label>
+              <input id="imp-custom" type="text" inputmode="decimal" autocomplete="off" aria-describedby="imp-custom-error">
+              <p class="error" id="imp-custom-error" role="alert"></p>
+            </div>
+            <div class="btn-row"><button type="button" class="btn btn-primary" id="imp-run">Calculate impact</button></div>
+            <p class="status-line" id="imp-status" role="status" aria-live="polite"></p>
+            <div class="breakdown" id="imp-result"></div>
+          </div>
+        </div>
+        <aside class="dash-side">
+          <div class="card">
+            <h2>Scenario comparison</h2>
+            <p class="small muted">Updates from the last calculated result and your settings.</p>
+            <div class="table-wrap" tabindex="0" role="region" aria-label="Scenario comparison table, scroll horizontally on small screens">
+              <table class="scenario-table" id="scenario-table">
+                <caption class="sr-only">Scenario comparison</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Scenario</th>
+                    <th scope="col">Future days</th>
+                    <th scope="col">Attended</th>
+                    <th scope="col">Missed</th>
+                    <th scope="col">Projected total</th>
+                    <th scope="col">Projected effective absences</th>
+                    <th scope="col">Projected %</th>
+                    <th scope="col">Difference from current</th>
+                  </tr>
+                </thead>
+                <tbody id="scenario-body"></tbody>
+              </table>
+            </div>
+            <p class="status-line" id="scenario-status"></p>
+            <div class="chart-wrap" id="scenario-chart"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- TARGET PLANNER -->
+    <section class="view" id="view-planner" data-view="planner" aria-labelledby="plan-title" hidden>
+      <h1 id="plan-title">Target Planner</h1>
+      <p class="muted">Lectures needed to reach a target, assuming the absences stay the same and every new lecture is attended.</p>
+      <div class="dash-grid">
+        <div class="dash-main">
+          <div class="card">
+            <div class="field">
+              <label for="plan-target">Target attendance</label>
+              <select id="plan-target">
+                <option value="65">65%</option>
+                <option value="70">70%</option>
+                <option value="75">75%</option>
+                <option value="80">80%</option>
+                <option value="85">85%</option>
+                <option value="90">90%</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            <div class="field" id="plan-custom-wrap" hidden>
+              <label for="plan-custom">Custom target (%)</label>
+              <input id="plan-custom" type="text" inputmode="decimal" autocomplete="off" aria-describedby="plan-custom-error">
+              <p class="help">Greater than 0 and less than 100.</p>
+              <p class="error" id="plan-custom-error" role="alert"></p>
+            </div>
+            <div class="btn-row"><button type="button" class="btn btn-primary" id="plan-run">Plan</button></div>
+            <p class="status-line" id="plan-status" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+        <aside class="dash-side">
+          <div class="card">
+            <h2>Plan result</h2>
+            <div class="breakdown" id="plan-result"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- MEDICAL ATTENDANCE -->
+    <section class="view" id="view-medical" data-view="medical" aria-labelledby="med-title" hidden>
+      <h1 id="med-title">Medical Attendance</h1>
+      <p class="muted">Simulate how approved medical leave changes your absence count. Medical lectures are removed from total absences; total lectures stay the same.</p>
+      <div class="dash-grid">
+        <div class="dash-main">
+          <div class="card">
+            <form id="medical-form" novalidate>
+              <div class="field">
+                <label for="medical-total">Total Lectures</label>
+                <input id="medical-total" name="medical-total" type="text" inputmode="numeric" autocomplete="off" aria-describedby="medical-total-help medical-total-error">
+                <p class="help" id="medical-total-help">Total lectures held so far. Must be greater than 0.</p>
+                <p class="error" id="medical-total-error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="medical-absent">Total Absent Lectures</label>
+                <input id="medical-absent" name="medical-absent" type="text" inputmode="numeric" autocomplete="off" aria-describedby="medical-absent-help medical-absent-error">
+                <p class="help" id="medical-absent-help">Whole number, at most Total Lectures.</p>
+                <p class="error" id="medical-absent-error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="medical-days">Approved Medical Days</label>
+                <input id="medical-days" name="medical-days" type="text" inputmode="numeric" autocomplete="off" aria-describedby="medical-days-help medical-days-error">
+                <p class="help" id="medical-days-help">Officially approved medical college days. Enter 0 if none.</p>
+                <p class="error" id="medical-days-error" role="alert"></p>
+              </div>
+              
+
+              <div class="btn-row">
+                <button type="submit" class="btn btn-primary" id="medical-submit">Calculate Medical Attendance</button>
+                <button type="button" class="btn btn-outline" id="medical-reset">Reset</button>
+              </div>
+              <p class="status-line" id="medical-form-status" role="status" aria-live="polite"></p>
+            </form>
+            <p class="small muted med-note" id="medical-note">Only officially approved medical leave should be counted.</p>
+          </div>
+          <div class="card">
+            <h2>How approved medical leave works</h2>
+            <p class="small">Each approved medical day is worth your lectures per college day. For example, 2 approved medical days at 8 lectures per day remove 16 lectures from your total absences. Total lectures are not changed, so attendance is recalculated only from the reduced absence count. This is a simulation and does not change your saved calculator results.</p>
+          </div>
+        </div>
+        <aside class="dash-side">
+          <div class="card result-card" aria-live="polite">
+            <h2>Medical result</h2>
+            <div class="med-grid">
+            <div class="med-card">
+              <p class="med-label">Original Attendance</p>
+              <p class="med-value" id="med-original">-</p>
+            </div>
+            <div class="med-card">
+              <p class="med-label">Approved Medical Lectures</p>
+              <p class="med-value" id="med-medical-lectures">-</p>
+            </div>
+            <div class="med-card">
+              <p class="med-label">Adjusted Absent Lectures</p>
+              <p class="med-value" id="med-adjusted-absences">-</p>
+            </div>
+            <div class="med-card">
+              <p class="med-label">Attendance After Medical Adjustment</p>
+              <p class="med-value" id="med-adjusted-att">-</p>
+            </div>
+            <div class="med-card">
+              <p class="med-label">Attendance Improvement</p>
+              <p class="med-value" id="med-improvement">-</p>
+            </div>
+            <div class="med-card">
+              <p class="med-label">Remaining Absences</p>
+              <p class="med-value" id="med-remaining">-</p>
+            </div>
+            </div>
+            <p class="status-line" id="medical-status" role="status" aria-live="polite"></p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="view-settings" data-view="settings" aria-labelledby="set-title" hidden>
+      <h1 id="set-title">College Timetable Settings</h1>
+      <div class="dash-grid">
+        <div class="dash-main">
+          <div class="card">
+            <form id="settings-form" novalidate>
+              <div class="field">
+                <label for="set-name">Display name (optional)</label>
+                <input id="set-name" type="text" autocomplete="name" maxlength="40" value="Student">
+              </div>
+              <div class="field">
+                <label for="set-lpd">Lectures per college day</label>
+                <input id="set-lpd" type="text" inputmode="numeric" autocomplete="off" aria-describedby="set-lpd-error">
+                <p class="error" id="set-lpd-error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="set-target">Attendance target (%)</label>
+                <input id="set-target" type="text" inputmode="decimal" autocomplete="off" aria-describedby="set-target-error">
+                <p class="error" id="set-target-error" role="alert"></p>
+              </div>
+              <div class="btn-row">
+                <button type="submit" class="btn btn-primary" id="set-save">Save</button>
+                <button type="button" class="btn btn-outline" id="set-reset">Reset to Defaults</button>
+              </div>
+              <p class="status-line" id="settings-status" role="status" aria-live="polite"></p>
+            </form>
+          </div>
+        </div>
+        <aside class="dash-side">
+          <div class="card">
+            <h2>Storage</h2>
+            <p class="small muted" id="storage-note">Checking storage…</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p class="disclaimer">AttendWise shows projections from the formula above. It does not know your college's official attendance rules, so always confirm with your institution.</p>
+    <p class="copyright">&copy; 2026 AttendWise &middot; Built by Aditya Verma</p>
+  </footer>
+  </div>
+  </div>
+
+  <script src="js/engine.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pwa.js"></script>
+  <script>
+    if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(function () { /* app works without SW */ });
+      });
+    }
+  </script>
+</body>
+</html>
