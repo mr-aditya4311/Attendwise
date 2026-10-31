@@ -147,42 +147,71 @@
   <!-- Sync Button -->
 <div class="erp-sync-container">
   <button 
-  id="openErpModalBtn" 
-  onclick="document.getElementById('erpModal').style.display='flex'" 
-  style="cursor: pointer; position: relative; z-index: 99999;">
-  Sync with PSIT ERP
+  type="button" 
+  id="openErpModalBtn"
+  onclick="document.getElementById('erpModal').style.display='flex'"
+  style="background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 16px; border-radius: 9999px; font-size: 0.82rem; font-weight: 500; cursor: pointer; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+  ⚡ Sync with PSIT ERP
 </button>
   <span id="lastSyncedText" class="sync-status"></span>
 </div>
 
-<!-- ERP Login Modal Popup -->
-<div id="erpModal" class="modal-overlay" style="display: none;">
-  <div class="modal-card">
-    <h3>PSIT ERP <span>Sync</span></h3>
-    <p class="modal-sub">Securely connect your college ERP account to automatically fetch and keep your attendance updated.</p>
+<!-- Proper Overlay Floating Modal -->
+<div id="erpModal" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 20px;">
+  
+  <div style="background: #111827; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 20px; width: 100%; max-width: 420px; padding: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); position: relative; color: #ffffff;">
     
-    <div class="form-group">
-      <label for="erpRoll">Roll Number</label>
-      <input type="text" id="erpRoll" placeholder="Enter your roll number" required />
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+      <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #ffffff;">PSIT ERP Sync</h3>
+      <button type="button" onclick="document.getElementById('erpModal').style.display='none'" style="background: none; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
     </div>
+    <p style="font-size: 0.8rem; color: #94a3b8; margin: 0 0 20px 0; line-height: 1.4;">
+      Securely connect your college ERP account to automatically fetch and keep your attendance updated.
+    </p>
 
-    <div class="form-group">
-      <label for="erpPass">ERP Password</label>
-      <input type="password" id="erpPass" placeholder="Enter your password" required />
-    </div>
+    <!-- Inputs Form -->
+    <form id="erpLoginForm" onsubmit="event.preventDefault();" style="display: flex; flex-direction: column; gap: 14px;">
+      
+      <div>
+        <label style="display: block; font-size: 0.78rem; font-weight: 500; color: #cbd5e1; margin-bottom: 6px;">Roll Number</label>
+        <input 
+          type="text" 
+          id="erpUsername" 
+          placeholder="Enter your roll number" 
+          style="width: 100%; box-sizing: border-box; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 10px 14px; font-size: 0.9rem; color: #ffffff; outline: none;" />
+      </div>
 
-    <div class="modal-actions">
-      <button id="erpSubmitBtn" type="button" class="btn-primary">Sync Now</button>
-      <button id="closeErpModalBtn" type="button" class="btn-secondary">Cancel</button>
-    </div>
-    
-    <p id="erpStatusMsg" class="status-msg"></p>
+      <div>
+        <label style="display: block; font-size: 0.78rem; font-weight: 500; color: #cbd5e1; margin-bottom: 6px;">ERP Password</label>
+        <input 
+          type="password" 
+          id="erpPassword" 
+          placeholder="Enter your password" 
+          style="width: 100%; box-sizing: border-box; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 10px 14px; font-size: 0.9rem; color: #ffffff; outline: none;" />
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button 
+          type="submit" 
+          id="erpSyncSubmitBtn" 
+          style="flex: 1; background: linear-gradient(135deg, #f97316, #ea580c); color: #ffffff; border: none; padding: 11px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);">
+          Sync Now
+        </button>
+        <button 
+          type="button" 
+          onclick="document.getElementById('erpModal').style.display='none'" 
+          style="flex: 1; background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); padding: 11px; border-radius: 10px; font-size: 0.9rem; font-weight: 500; cursor: pointer;">
+          Cancel
+        </button>
+      </div>
+
+      <div id="erpSyncStatus" style="font-size: 0.8rem; text-align: center; margin-top: 6px; min-height: 18px;"></div>
+    </form>
+
   </div>
 </div>
-
-  <div class="content">
-
-  <main id="main" class="container" tabindex="-1">
     <!-- HOME -->
     <section class="view" id="view-home" data-view="home" aria-labelledby="home-title">
       <div class="hero">
