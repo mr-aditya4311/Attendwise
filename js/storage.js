@@ -150,3 +150,73 @@
     _setBackendForTests
   };
 });
+// Global function jo ERP data ko local storage me save aur broadcast karega
+function saveGlobalErpAttendance(data) {
+    const erpState = {
+        totalLecture: parseInt(data.totalLectures, 10) || 0,
+        totalAbsentOAA: parseInt(data.totalAbsentWithOAA, 10) || 0,
+        oaAttendance: parseInt(data.oaa, 10) || 0,
+        pf: parseInt(data.pf, 10) || 0,
+        attended: parseInt(data.attended, 10) || 0,
+        percentage: parseFloat(data.percentage) || 0,
+        lastSynced: new Date().toISOString()
+    };
+
+    localStorage.setItem("attendwise_erp_data", JSON.stringify(erpState));
+    
+    // Pure website ke sabhi forms/tabs me values populate karein
+    populateAllPagesFromStorage();
+}
+
+// Storage se utha kar Calculator, Predictor, Planner har page par fill karna
+function populateAllPagesFromStorage() {
+    const raw = localStorage.getItem("attendwise_erp_data");
+    if (!raw) return;
+
+    const data = JSON.parse(raw);
+
+    // 1. CALCULATOR PAGE INPUTS
+    // Input IDs ya labels ke through inputs grab karein
+    const allInputs = document.querySelectorAll("input");
+    
+    // PSIT Calculator Specific Fields:
+    allInputs.forEach(input => {
+        const placeholder = (input.placeholder || "").toLowerCase();
+        const id = (input.id || "").toLowerCase();
+        const name = (input.name || "").toLowerCase();
+
+        // Total Absent + OAA
+        if (id.includes("absent") || name.includes("absent") || placeholder.includes("absent")) {
+            input.value = data.totalAbsentOAA;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        // O.A. Attendance
+        else if (id.includes("oa") || id.includes("oaa") || name.includes("oa") || placeholder.includes("official")) {
+            input.value = data.oaAttendance;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        // Total Lecture
+        else if (id.includes("total") || name.includes("total") || placeholder.includes("total lectures")) {
+            input.value = data.totalLecture;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        // SAR lectures
+        else if (id.includes("sar") || name.includes("sar")) {
+            input.value = data.pf || 0;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+    });
+
+    // 2. Calculator ka "Calculate" button automatically trigger karein
+    const calcBtn = document.querySelector("#calculateBtn, .btn-calculate") || 
+                    Array.from(document.querySelectorAll("button")).find(b => b.innerText.trim().toLowerCase() === "calculate");
+    if (calcBtn) {
+        calcBtn.click();
+    }
+
+    // 3. Header Sync Status Update
+    const syncStatusEl = document.getElementById("lastSyncedText");
+    if (syncStatusEl && data.lastSynced) {
+        syncStatusEl.innerText = `Synced: ${new Date(data.lastSynced).toLocaleDateString()}`;
+    }
+}
