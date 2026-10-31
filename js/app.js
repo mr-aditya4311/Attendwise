@@ -2,6 +2,7 @@
  * AttendWise UI layer. All calculations go through AttendEngine; this file
  * only reads inputs, calls the engine, and renders results.
  */
+const ERP_BACKEND_URL = "https://attendwise-backend-tihk.onrender.com";
 (function () {
   'use strict';
 
