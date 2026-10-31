@@ -148,10 +148,10 @@
 <div class="erp-sync-container">
   <button 
   type="button" 
-  id="openErpModalBtn"
-  onclick="document.getElementById('erpModal').style.display='flex'"
-  style="background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 16px; border-radius: 9999px; font-size: 0.82rem; font-weight: 500; cursor: pointer; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
-  ⚡ Sync with PSIT ERP
+  id="erpSyncSubmitBtn" 
+  onclick="window.handleErpSync()" 
+  style="flex: 1; background: linear-gradient(135deg, #f97316, #ea580c); color: #ffffff; border: none; padding: 11px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+  Sync Now
 </button>
   <span id="lastSyncedText" class="sync-status"></span>
 </div>
