@@ -1137,3 +1137,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.addEventListener("hashchange", () => setTimeout(fillInputsWithExactIds, 80));
 document.addEventListener("click", () => setTimeout(fillInputsWithExactIds, 120));
+window.handleErpSync = async function () {
+  console.log("Sync button clicked!");
+  const user = document.getElementById("erpUsername")?.value.trim();
+  const pass = document.getElementById("erpPassword")?.value.trim();
+  const statusEl = document.getElementById("erpSyncStatus");
+
+  if (!user || !pass) {
+    alert("Kripya Roll number aur Password dono daalein.");
+    return;
+  }
+
+  if (statusEl) {
+    statusEl.innerText = "Connecting to PSIT ERP (Wait 30-40s for Render wake up)...";
+    statusEl.style.color = "#f97316";
+  }
+
+  try {
+    console.log("Sending request to:", ERP_BACKEND_URL);
+    const res = await fetch(`${ERP_BACKEND_URL}/sync`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: user, password: pass })
+    });
+
+    const result = await res.json();
+    console.log("ERP Response:", result);
+
+    if (!res.ok || !result.success) {
+      throw new Error(result.message || "Sync fail ho gaya");
+    }
+
+    if (statusEl) {
+      statusEl.innerText = "Sync Successful!";
+      statusEl.style.color = "#22c55e";
+    }
+
+    // Modal band karein aur data update karein
+    if (typeof fillInputsWithExactIds === "function") {
+      fillInputsWithExactIds(result.data);
+    }
+    
+    setTimeout(() => {
+      document.getElementById("erpModal").style.display = "none";
+    }, 1000);
+
+  } catch (err) {
+    console.error("Sync Error:", err);
+    if (statusEl) {
+      statusEl.innerText = `Error: ${err.message}`;
+      statusEl.style.color = "#ef4444";
+    }
+    alert(`Sync fail hua: ${err.message}`);
+  }
+};
