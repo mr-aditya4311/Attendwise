@@ -146,9 +146,12 @@
   </header>
   <!-- Sync Button -->
 <div class="erp-sync-container">
-  <button id="openErpModalBtn" type="button" class="btn-erp">
-    🔄 Sync with PSIT ERP
-  </button>
+  <button 
+  id="openErpModalBtn" 
+  onclick="document.getElementById('erpModal').style.display='flex'" 
+  style="cursor: pointer; position: relative; z-index: 99999;">
+  Sync with PSIT ERP
+</button>
   <span id="lastSyncedText" class="sync-status"></span>
 </div>
 
